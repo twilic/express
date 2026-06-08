@@ -1,0 +1,70 @@
+{
+  "name": "@twilic/express",
+  "version": "0.1.0",
+  "description": "Express middleware and helpers for Twilic binary request and response bodies.",
+  "keywords": [
+    "binary",
+    "express",
+    "middleware",
+    "twilic"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twilic/express.git"
+  },
+  "homepage": "https://github.com/twilic/express#readme",
+  "bugs": {
+    "url": "https://github.com/twilic/express/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint src tests",
+    "lint:fix": "oxlint --fix src tests",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && node --test --test-concurrency=1 \"tests/**/*.test.mjs\"",
+    "prepack": "pnpm build",
+    "release:check": "node ./scripts/verify-tag-version.mjs",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@twilic/core": "^3.0.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.1.0",
+    "express": "^4.21.0",
+    "husky": "^9.1.7",
+    "oxfmt": "^0.50.0",
+    "oxlint": "^1.65.0",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "@twilic/core": "^3.0.0",
+    "express": "^4.0.0 || ^5.0.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.18.1"
+}
