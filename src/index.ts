@@ -1,5 +1,6 @@
 import { decode, encode, type TwilicValue } from "@twilic/core";
 import type { Request, RequestHandler, Response } from "express";
+import "./types.js";
 
 export const TWILIC_CONTENT_TYPE = "application/vnd.twilic";
 

@@ -31,6 +31,17 @@ Do not mount `express.json()` before Twilic routes on the same path, or the requ
 - `twilicParser(options?)`
 - `createTwilicExpress(codec?)`
 
+## Runnable example
+
+Clone [twilic/examples](https://github.com/twilic/examples) and run the HTTP round-trip demo:
+
+```bash
+pnpm example:http-roundtrip          # Express server
+pnpm example:http-roundtrip:client   # @twilic/fetch client
+```
+
+See [`http-roundtrip/`](https://github.com/twilic/examples/tree/main/http-roundtrip).
+
 ## Changelog
 
 See [docs/CHANGELOG.md](docs/CHANGELOG.md).

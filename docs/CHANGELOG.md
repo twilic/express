@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-20
+
+### Fixed
+
+- Ship Express `Request.twilicBody` TypeScript augmentation in the published package (`dist/types.d.ts`).
+
 ## [0.1.0] - 2026-06-08
 
 Initial public release of `@twilic/express`.

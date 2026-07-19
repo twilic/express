@@ -1,6 +1,6 @@
 {
   "name": "@twilic/express",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Express middleware and helpers for Twilic binary request and response bodies.",
   "keywords": [
     "binary",
