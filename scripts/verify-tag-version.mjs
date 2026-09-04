@@ -15,6 +15,6 @@ if (!tag) {
 const normalizedTag = tag.startsWith("v") ? tag.slice(1) : tag;
 if (normalizedTag !== packageJson.version) {
   throw new Error(
-    `tag/version mismatch: tag=${tag} package.json version=${packageJson.version}`,
+    `tag/version mismatch: tag=${tag} package.json version=${packageJson.version}`
   );
 }

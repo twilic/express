@@ -1,7 +1,9 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
-import express from "express";
+import { test } from "node:test";
+
 import { decode, encode } from "@twilic/core";
+import express from "express";
+
 import {
   createTwilicExpress,
   twilicParser,
@@ -145,7 +147,7 @@ test("requireContentType false skips validation", async () => {
     twilic.parser({ requireContentType: false }),
     (req, res) => {
       res.json(req.twilicBody);
-    },
+    }
   );
 
   const { status, json } = await requestApp(app, "/users", {
@@ -166,7 +168,7 @@ test("requireContentType false still decodes with missing content-type", async (
     twilic.parser({ requireContentType: false }),
     (req, res) => {
       res.json(req.twilicBody);
-    },
+    }
   );
 
   const { status, json } = await requestApp(app, "/users", {

@@ -1,7 +1,9 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
-import express from "express";
+import { test } from "node:test";
+
 import { decode } from "@twilic/core";
+import express from "express";
+
 import { createTwilicExpress, twilicSend } from "../dist/index.js";
 import {
   TWILIC_CONTENT_TYPE,
@@ -57,7 +59,7 @@ test("twilicSend overwrites caller content-type with Twilic", async () => {
     twilicSend(
       res,
       { ok: true },
-      { headers: { "content-type": "application/json" } },
+      { headers: { "content-type": "application/json" } }
     );
   });
 

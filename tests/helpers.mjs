@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import http from "node:http";
+
 import { TWILIC_CONTENT_TYPE } from "../dist/index.js";
 
 const encoder = new TextEncoder();

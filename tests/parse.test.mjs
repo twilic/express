@@ -1,7 +1,9 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
-import express from "express";
+import { test } from "node:test";
+
 import { decode, encode } from "@twilic/core";
+import express from "express";
+
 import { createTwilicExpress, parseTwilic, twilicSend } from "../dist/index.js";
 import {
   TWILIC_CONTENT_TYPE,

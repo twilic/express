@@ -1,5 +1,6 @@
 import { decode, encode, type TwilicValue } from "@twilic/core";
 import type { Request, RequestHandler, Response } from "express";
+
 import "./types.js";
 
 export const TWILIC_CONTENT_TYPE = "application/vnd.twilic";
@@ -38,7 +39,7 @@ async function readRequestBody(req: Request): Promise<Buffer> {
 
 function parseWithCodec<T>(codec: TwilicCodec, req: Request): Promise<T> {
   return readRequestBody(req).then(
-    (body) => codec.decode(new Uint8Array(body)) as T,
+    (body) => codec.decode(new Uint8Array(body)) as T
   );
 }
 
@@ -46,7 +47,7 @@ function sendWithCodec(
   codec: TwilicCodec,
   res: Response,
   value: TwilicValue,
-  init?: TwilicSendInit,
+  init?: TwilicSendInit
 ): void {
   const body = Buffer.from(codec.encode(value));
   if (init?.status !== undefined) {
@@ -63,7 +64,7 @@ function sendWithCodec(
 
 function parserWithCodec<T>(
   codec: TwilicCodec,
-  options?: TwilicParserOptions,
+  options?: TwilicParserOptions
 ): RequestHandler {
   const requireContentType = options?.requireContentType ?? true;
 
@@ -90,7 +91,7 @@ const defaultCodec: TwilicCodec = {
 };
 
 export function createTwilicExpress<T = TwilicValue>(
-  codec: TwilicCodec = defaultCodec,
+  codec: TwilicCodec = defaultCodec
 ): TwilicExpress<T> {
   return {
     parse: (req) => parseWithCodec<T>(codec, req),
@@ -106,13 +107,13 @@ export function parseTwilic<T = TwilicValue>(req: Request): Promise<T> {
 export function twilicSend(
   res: Response,
   value: TwilicValue,
-  init?: TwilicSendInit,
+  init?: TwilicSendInit
 ): void {
   sendWithCodec(defaultCodec, res, value, init);
 }
 
 export function twilicParser<T = TwilicValue>(
-  options?: TwilicParserOptions,
+  options?: TwilicParserOptions
 ): RequestHandler {
   return parserWithCodec<T>(defaultCodec, options);
 }
