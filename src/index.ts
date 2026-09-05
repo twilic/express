@@ -10,8 +10,12 @@ export interface TwilicCodec {
   decode: (bytes: Uint8Array) => TwilicValue;
 }
 
+export const DEFAULT_BODY_LIMIT = 1_048_576;
+
 export interface TwilicParserOptions {
   requireContentType?: boolean;
+  /** Maximum request body bytes. Defaults to 1 MiB. */
+  limit?: number;
 }
 
 export interface TwilicSendInit {
@@ -20,25 +24,53 @@ export interface TwilicSendInit {
 }
 
 export interface TwilicExpress<T = TwilicValue> {
-  parse: (req: Request) => Promise<T>;
+  parse: (req: Request, options?: TwilicParserOptions) => Promise<T>;
   send: (res: Response, value: TwilicValue, init?: TwilicSendInit) => void;
   parser: (options?: TwilicParserOptions) => RequestHandler;
+}
+
+function bodyLimit(options?: TwilicParserOptions): number {
+  const limit = options?.limit ?? DEFAULT_BODY_LIMIT;
+  if (!Number.isSafeInteger(limit) || limit < 0) {
+    throw new RangeError("limit must be a non-negative safe integer");
+  }
+  return limit;
 }
 
 function hasTwilicContentType(contentType: string | undefined): boolean {
   return contentType?.startsWith(TWILIC_CONTENT_TYPE) ?? false;
 }
 
-async function readRequestBody(req: Request): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+export class TwilicBodyLimitError extends Error {
+  readonly status = 413;
+  readonly statusCode = 413;
+  constructor() {
+    super("Twilic request body exceeds limit");
   }
-  return Buffer.concat(chunks);
 }
 
-function parseWithCodec<T>(codec: TwilicCodec, req: Request): Promise<T> {
-  return readRequestBody(req).then(
+async function readRequestBody(req: Request, limit: number): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let total = 0;
+  // Keep the socket available long enough for the middleware to return 413.
+  for await (const chunk of req.iterator({ destroyOnReturn: false })) {
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    if (bytes.length > limit - total) {
+      req.pause();
+      throw new TwilicBodyLimitError();
+    }
+    total += bytes.length;
+    chunks.push(bytes);
+  }
+  return Buffer.concat(chunks, total);
+}
+
+function parseWithCodec<T>(
+  codec: TwilicCodec,
+  req: Request,
+  options?: TwilicParserOptions
+): Promise<T> {
+  return readRequestBody(req, bodyLimit(options)).then(
     (body) => codec.decode(new Uint8Array(body)) as T
   );
 }
@@ -67,6 +99,7 @@ function parserWithCodec<T>(
   options?: TwilicParserOptions
 ): RequestHandler {
   const requireContentType = options?.requireContentType ?? true;
+  bodyLimit(options);
 
   return async (req, res, next) => {
     const contentType = req.headers["content-type"];
@@ -76,10 +109,15 @@ function parserWithCodec<T>(
     }
 
     try {
-      const value = await parseWithCodec<T>(codec, req);
+      const value = await parseWithCodec<T>(codec, req, options);
       req.twilicBody = value as TwilicValue;
       next();
     } catch (error) {
+      if (error instanceof TwilicBodyLimitError) {
+        res.setHeader("Connection", "close");
+        res.status(413).send(error.message);
+        return;
+      }
       next(error);
     }
   };
@@ -94,14 +132,17 @@ export function createTwilicExpress<T = TwilicValue>(
   codec: TwilicCodec = defaultCodec
 ): TwilicExpress<T> {
   return {
-    parse: (req) => parseWithCodec<T>(codec, req),
+    parse: (req, options) => parseWithCodec<T>(codec, req, options),
     send: (res, value, init) => sendWithCodec(codec, res, value, init),
     parser: (options) => parserWithCodec<T>(codec, options),
   };
 }
 
-export function parseTwilic<T = TwilicValue>(req: Request): Promise<T> {
-  return parseWithCodec<T>(defaultCodec, req);
+export function parseTwilic<T = TwilicValue>(
+  req: Request,
+  options?: TwilicParserOptions
+): Promise<T> {
+  return parseWithCodec<T>(defaultCodec, req, options);
 }
 
 export function twilicSend(
